@@ -1,12 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 a = Analysis(
-    ['main.py'],
+    ['desktop_app.py'],
     pathex=[],
     binaries=[],
-    datas=[],
-    hiddenimports=[],
+    datas=[
+        ('index.html', '.'),
+        ('css', 'css'),
+        ('js', 'js'),
+        ('server.py', '.'),
+        ('database.py', '.'),
+        ('logic.py', '.'),
+        ('.env', '.'),
+        ('focusflow_logo.png', '.'),
+    ],
+    hiddenimports=[
+        'flask',
+        'webview',
+        'jinja2',
+        'werkzeug',
+        'markupsafe',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -40,5 +54,5 @@ app = BUNDLE(
     exe,
     name='FocusFlowPro.app',
     icon=None,
-    bundle_identifier=None,
+    bundle_identifier='com.focusflowpro.app',
 )
