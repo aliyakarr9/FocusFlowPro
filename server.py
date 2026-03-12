@@ -5,7 +5,7 @@ Serves static files + auto-saves/loads data to/from JSON on disk.
 Usage:
     cd ~/PycharmProjects/FocusFlow
     python3 server.py
-    Then open http://localhost:5000 in your browser.
+    Then open http://localhost:3000 in your browser.
 """
 
 from flask import Flask, request, jsonify, send_file, send_from_directory

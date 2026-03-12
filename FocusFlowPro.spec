@@ -9,8 +9,6 @@ a = Analysis(
         ('css', 'css'),
         ('js', 'js'),
         ('server.py', '.'),
-        ('database.py', '.'),
-        ('logic.py', '.'),
         ('.env', '.'),
         ('focusflow_logo.png', '.'),
     ],

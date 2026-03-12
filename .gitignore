@@ -1,0 +1,29 @@
+# Environment & Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Build artifacts
+build/
+dist/
+*.spec
+FocusFlowPro.iconset/
+
+# macOS
+.DS_Store
+
+# Data files (server creates these at ~/FocusFlowData/)
+backups/
+focusflow_data.json
+veriler.json
+akilli_veriler.json
+asistan_verileri.json
