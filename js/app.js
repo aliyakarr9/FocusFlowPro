@@ -168,6 +168,10 @@ class App {
             if (this.currentPage === 'habits') this.refreshCurrentPage();
         });
 
+        store.on('schedule-changed', () => {
+            if (this.currentPage === 'schedule') this.refreshCurrentPage();
+        });
+
         // Theme picker toggle
         document.getElementById('theme-toggle')?.addEventListener('click', (e) => {
             e.stopPropagation();

@@ -548,6 +548,18 @@ class Store {
         this._emit('schedule-changed');
     }
 
+    updateScheduleEntry(id, updates) {
+        const entry = this._state.weeklySchedule.find(e => e.id === id);
+        if (!entry || !updates) return null;
+        const changes = {};
+        if (typeof updates.activity === 'string' && updates.activity.trim()) changes.activity = updates.activity.trim();
+        if (this._state.categories.some(c => c.id === updates.category)) changes.category = updates.category;
+        if (['low', 'medium', 'high'].includes(updates.priority)) changes.priority = updates.priority;
+        if (Object.keys(changes).length === 0) return null;
+        this.setWeeklySchedule(this._state.weeklySchedule.map(e => e.id === id ? { ...e, ...changes } : e));
+        return this._state.weeklySchedule.find(e => e.id === id);
+    }
+
     clearWeeklySchedule() {
         this._state.weeklySchedule = [];
         this._save();

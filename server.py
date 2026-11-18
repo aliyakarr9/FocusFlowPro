@@ -147,7 +147,7 @@ def chat_endpoint():
         "tasks": [{"id": t.get("id"), "title": t.get("title"), "dueDate": t.get("dueDate"), "list": t.get("list"), "completed": t.get("completed"), "priority": t.get("priority")} for t in current_state.get("tasks", [])],
         "categories": [c.get("id") for c in current_state.get("categories", [])],
         "habits": [{"id": h.get("id"), "name": h.get("name")} for h in current_state.get("habits", [])],
-        "schedule": current_state.get("schedule", {})
+        "schedule": [{"id": e.get("id"), "day": e.get("day"), "time": e.get("time"), "activity": e.get("activity"), "category": e.get("category"), "priority": e.get("priority")} for e in current_state.get("weeklySchedule", [])]
     }
     
     prompt = f"""Sen FocusFlow Pro yönetim sisteminin entegre Yapay Zeka Asistanısın. 
@@ -172,7 +172,7 @@ Aksiyon Tipleri ve Payload Örnekleri:
 2. "deleteTask" -> payload: {{"id": "silinecek-gorevin-id-si"}}
 3. "updateTask" -> payload: {{"id": "guncellenecek-gorev-id", "updates": {{"title": "yeni ad", "priority": "low", "list": "daily"}}}} // Yalnızca değişen özellikler
 4. "addHabit" -> payload: "Alışkanlık adı"
-5. "updateSchedule" -> payload: {{"day": "pazartesi", "blockId": "08:30", "updates": {{"subject": "MATE134", "difficulty": "basit", "type": "ders"}}}} // Haftalık program yönetimi
+5. "updateSchedule" -> payload: {{"id": "guncellenecek-program-girdisinin-id-si", "updates": {{"activity": "MATE134", "category": "Kategori", "priority": "low | medium | high"}}}} // Haftalık programdaki ("schedule") mevcut bir girdiyi günceller. Yalnızca değişen özellikler; priority zorluğu ifade eder (low=kolay, medium=orta, high=zor)
 6. "clearCompleted" -> payload: {{"list": "daily"}} // veya "weekly"
 7. "addCategory" -> payload: {{"label": "Kategori Adı", "icon": "🎨", "color": "#hexKodu"}}
 8. "deleteCategory" -> payload: {{"id": "Silinecek Kategori Adı"}}

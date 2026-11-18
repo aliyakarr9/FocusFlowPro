@@ -107,8 +107,8 @@ export function renderAIChatWidget() {
                                     store.updateTask(action.payload.id, action.payload.updates);
                                 }
                             } else if (action.type === 'updateSchedule') {
-                                if (action.payload && action.payload.day && action.payload.blockId && action.payload.updates) {
-                                    store.updateScheduleBlock(action.payload.day, action.payload.blockId, action.payload.updates);
+                                if (action.payload && action.payload.id && action.payload.updates) {
+                                    store.updateScheduleEntry(action.payload.id, action.payload.updates);
                                 }
                             } else if (action.type === 'clearCompleted') {
                                 store.clearCompleted(action.payload.list || 'daily');
