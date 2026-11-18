@@ -1,7 +1,7 @@
 import store from '../store.js';
 import { icon } from '../utils/icons.js';
 
-const HISTORY_KEY = 'focusflow-chat';
+const HISTORY_KEY = 'tdapp-chat';
 const MAX_HISTORY = 40;
 
 const SUGGESTIONS = [

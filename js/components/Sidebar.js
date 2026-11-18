@@ -19,7 +19,7 @@ export function renderSidebar() {
   sidebar.innerHTML = `
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <span class="logo-text">FocusFlow</span>
+        <span class="logo-text">TDAPP</span>
       </div>
     </div>
 

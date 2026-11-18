@@ -1,11 +1,11 @@
-# ⏱ FocusFlow Pro - Görev ve Odak Yöneticisi - Web & Masaüstü
+# ⏱ TDAPP - Görev ve Odak Yöneticisi - Web & Masaüstü
 
 ![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Web-blue)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-orange)
 ![Flask](https://img.shields.io/badge/Backend-Flask-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**FocusFlow Pro**, günlük ve haftalık görevleri, Pomodoro oturumlarını, alışkanlıkları ve ders programını tek yerde toplayan bir görev ve odak yöneticisidir. Kendi bilgisayarınızda çalışır: hesap açmak gerekmez, veriler ev klasörünüzdeki tek bir dosyada durur. Tarayıcıda ya da bağımsız bir masaüstü penceresinde kullanılabilir.
+**TDAPP**, günlük ve haftalık görevleri, Pomodoro oturumlarını, alışkanlıkları ve ders programını tek yerde toplayan bir görev ve odak yöneticisidir. Kendi bilgisayarınızda çalışır: hesap açmak gerekmez, veriler ev klasörünüzdeki tek bir dosyada durur. Tarayıcıda ya da bağımsız bir masaüstü penceresinde kullanılabilir.
 
 ---
 
@@ -77,14 +77,14 @@
 * **Sunucu:** Python ve Flask (`server.py`). Arayüz dosyalarını sunar, veriyi okur ve yazar, asistan isteklerini Gemini'ye iletir.
 * **Arayüz:** Çerçeve kullanılmadan, ES modülleriyle yazılmış JavaScript. Derleme adımı yoktur; her sayfa `js/components/` altında kendi dosyasındadır.
 * **Durum yönetimi:** Bütün veri tek bir `Store` sınıfında tutulur (`js/store.js`). Bileşenler olaylara abone olur, değişiklikler 300 ms'de bir toplu kaydedilir.
-* **Veri:** `~/FocusFlowData/focusflow_data.json`. Yazma önce geçici dosyaya yapılır, sonra asıl dosyanın yerine konur; yarıda kesilen bir kayıt dosyayı bozmaz. Yedekler aynı klasördeki `backups/` altındadır.
+* **Veri:** `~/TDAPPData/tdapp_data.json`. Yazma önce geçici dosyaya yapılır, sonra asıl dosyanın yerine konur; yarıda kesilen bir kayıt dosyayı bozmaz. Yedekler aynı klasördeki `backups/` altındadır.
 * **Tema:** Renklerin tamamı CSS değişkenleridir (`css/style.css`). Tema `data-theme`, vurgu rengi `data-accent` özniteliğiyle değişir; yeni bir vurgu rengi eklemek birkaç satırdır.
 * **Simgeler:** Uygulamanın içine gömülü çizgi simgeler (`js/utils/icons.js`). Yazı tipi sistem yazı tipidir; arayüz internet olmadan da aynı görünür.
 * **Asistan:** Model yanıtı JSON olarak döner; içindeki eylemler tarayıcıda doğrulanır ve uygulamanın kendi işlevleriyle uygulanır. Tanınmayan ya da geçersiz eylemler atlanır.
 * **Masaüstü:** `desktop_app.py`, sunucuyu arka planda başlatır ve arayüzü pywebview penceresinde açar.
 
 ```
-FocusFlowPro/
+TDAPP/
 ├── server.py            # Flask sunucusu ve asistan uç noktası
 ├── desktop_app.py       # Masaüstü penceresi
 ├── index.html
@@ -139,7 +139,7 @@ Python 3.10 ya da üstü gerekir.
 
 ## 🔒 Veriler ve Asistan Hakkında
 
-* Görevleriniz, alışkanlıklarınız ve ders programınız yalnızca kendi bilgisayarınızda, `~/FocusFlowData` klasöründe durur. Analiz sayfasından dışa aktarılabilir ve yeniden içe aktarılabilir.
+* Görevleriniz, alışkanlıklarınız ve ders programınız yalnızca kendi bilgisayarınızda, `~/TDAPPData` klasöründe durur. Analiz sayfasından dışa aktarılabilir ve yeniden içe aktarılabilir.
 * Asistan isteğe bağlıdır; anahtar girilmezse uygulamanın geri kalanı eksiksiz çalışır.
 * Asistana yazdığınızda mesajınızla birlikte görev başlıklarınız, alışkanlık adlarınız ve ders programınız yanıt üretilebilmesi için Google'ın Gemini servisine gönderilir. Bunun dışında hiçbir veri bilgisayarınızdan çıkmaz.
 * `.env` dosyası depoya girmez; anahtarınızı kimseyle paylaşmayın.

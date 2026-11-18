@@ -1,7 +1,7 @@
 """
-FocusFlow Pro sunucusu.
+TDAPP sunucusu.
 
-Arayüz dosyalarını sunar, veriyi ~/FocusFlowData altındaki JSON dosyasında tutar
+Arayüz dosyalarını sunar, veriyi ~/TDAPPData altındaki JSON dosyasında tutar
 ve asistan isteklerini Gemini'ye iletir.
 
     python3 server.py        ->  http://localhost:3000
@@ -28,14 +28,37 @@ else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Veri her zaman kullanıcının ev klasöründe durur (paketli sürümde de)
-DATA_DIR = os.path.join(os.path.expanduser('~'), 'FocusFlowData')
+DATA_DIR = os.path.join(os.path.expanduser('~'), 'TDAPPData')
+DATA_FILE = os.path.join(DATA_DIR, 'tdapp_data.json')
+BACKUP_DIR = os.path.join(DATA_DIR, 'backups')
+
+# Uygulamanın eski adıyla (FocusFlow) tutulan veri
+OLD_DATA_DIR = os.path.join(os.path.expanduser('~'), 'FocusFlowData')
+OLD_PREFIX = 'focusflow_'
+
+
+def migrate_old_data():
+    """Eski klasördeki veriyi bir kez yeni klasöre kopyalar; eski klasöre dokunmaz."""
+    if os.path.exists(DATA_DIR) or not os.path.isdir(OLD_DATA_DIR):
+        return
+    tmp_dir = DATA_DIR + '.tmp'
+    shutil.rmtree(tmp_dir, ignore_errors=True)
+    shutil.copytree(OLD_DATA_DIR, tmp_dir)
+    for folder in (tmp_dir, os.path.join(tmp_dir, 'backups')):
+        if not os.path.isdir(folder):
+            continue
+        for name in os.listdir(folder):
+            if name.startswith(OLD_PREFIX) and name.endswith('.json'):
+                os.replace(os.path.join(folder, name), os.path.join(folder, 'tdapp_' + name[len(OLD_PREFIX):]))
+    os.replace(tmp_dir, DATA_DIR)
+    print(f"Veriler {OLD_DATA_DIR} klasöründen {DATA_DIR} klasörüne kopyalandı.")
+
+
+migrate_old_data()
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
 app = Flask(__name__)
-
-DATA_FILE = os.path.join(DATA_DIR, 'focusflow_data.json')
-BACKUP_DIR = os.path.join(DATA_DIR, 'backups')
 
 
 DEFAULT_STATE = {
@@ -87,7 +110,7 @@ def auto_backup():
         return
     os.makedirs(BACKUP_DIR, exist_ok=True)
     today = datetime.now().strftime('%Y-%m-%d')
-    backup_file = os.path.join(BACKUP_DIR, f'focusflow_backup_{today}.json')
+    backup_file = os.path.join(BACKUP_DIR, f'tdapp_backup_{today}.json')
     if not os.path.exists(backup_file):
         shutil.copy2(DATA_FILE, backup_file)
         print(f"Günlük yedek alındı: {backup_file}")
@@ -202,7 +225,7 @@ def build_chat_prompt(user_message, mini_state, history):
         if text:
             transcript += f"{who}: {text}\n"
 
-    return f"""Sen FocusFlow Pro adlı görev ve odak uygulamasının içindeki asistansın. Kullanıcının verilerini görebilir ve aşağıdaki eylemlerle değiştirebilirsin.
+    return f"""Sen TDAPP adlı görev ve odak uygulamasının içindeki asistansın. Kullanıcının verilerini görebilir ve aşağıdaki eylemlerle değiştirebilirsin.
 
 Bugün: {today} ({weekday}). Saat: {now.strftime('%H:%M')}.
 
@@ -296,7 +319,7 @@ def chat_endpoint():
 
 if __name__ == '__main__':
     auto_backup()
-    print("FocusFlow Pro: http://localhost:3000")
+    print("TDAPP: http://localhost:3000")
     print("Veri dosyası:", DATA_FILE)
     # Hata ayıklama modu yalnızca istenirse açılır: FLASK_DEBUG=1 python3 server.py
     app.run(debug=os.environ.get("FLASK_DEBUG") == "1", port=3000)

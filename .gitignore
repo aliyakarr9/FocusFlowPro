@@ -16,12 +16,13 @@ venv/
 build/
 dist/
 *.spec
-FocusFlowPro.iconset/
+TDAPP.iconset/
 focusflow_logo.png
 
 # macOS
 .DS_Store
 
-# Veri dosyaları (sunucu bunları ~/FocusFlowData altında tutar)
+# Veri dosyaları (sunucu bunları ~/TDAPPData altında tutar)
 backups/
+tdapp_data.json
 focusflow_data.json

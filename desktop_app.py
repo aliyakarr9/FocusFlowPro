@@ -1,5 +1,5 @@
 """
-FocusFlow Pro masaüstü başlatıcısı.
+TDAPP masaüstü başlatıcısı.
 
 Sunucuyu arka planda çalıştırır ve arayüzü pywebview penceresinde açar.
 """
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     import webview
     webview.create_window(
-        'FocusFlow Pro',
+        'TDAPP',
         f'http://localhost:{DYNAMIC_PORT}',
         width=1200,
         height=800,

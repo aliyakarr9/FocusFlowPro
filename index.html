@@ -5,12 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="FocusFlow Pro — Modern görev yönetimi ve odaklanma aracı. Günlük & haftalık planlama, Pomodoro zamanlayıcı, analiz paneli." />
-  <title>FocusFlow Pro — Akıllı Görev Yöneticisi</title>
+    content="TDAPP: görevler, Pomodoro, alışkanlıklar ve ders programı tek yerde." />
+  <title>TDAPP</title>
   <script>
     // Son kullanılan görünümü ilk boyamadan önce uygula
     try {
-      var a = JSON.parse(localStorage.getItem('focusflow-appearance') || 'null');
+      var a = JSON.parse(localStorage.getItem('tdapp-appearance') || 'null');
       if (a) {
         var dark = a.theme === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : a.theme !== 'light';
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');

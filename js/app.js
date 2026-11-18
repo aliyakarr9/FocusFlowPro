@@ -42,7 +42,7 @@ const ACCENTS = [
     { id: 'graphite', label: 'Grafit' },
 ];
 
-const APPEARANCE_KEY = 'focusflow-appearance';
+const APPEARANCE_KEY = 'tdapp-appearance';
 
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
 const MOD = isMac ? '⌘' : 'Ctrl';
