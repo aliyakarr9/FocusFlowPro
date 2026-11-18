@@ -160,4 +160,4 @@ Yeni bir vurgu rengi eklemek, bir sayfayı geliştirmek veya mevcut bir hatayı 
 👨‍💻 **Geliştiren & Tasarlayan:** [Ali Yakar](https://github.com/aliyakarr9)  
 📧 İletişim, işbirlikleri ve geri bildirim için GitHub üzerinden bana ulaşabilirsiniz.
 
-> *"Küçük adımlar büyük sonuçlar doğurur."*
+
