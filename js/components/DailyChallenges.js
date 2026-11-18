@@ -1,8 +1,5 @@
-/* ============================================
-   FocusFlow Pro — Daily Challenges Component
-   ============================================ */
-
 import store from '../store.js';
+import { icon } from '../utils/icons.js';
 
 export function renderDailyChallenges(container) {
   const ch = store.dailyChallenges;
@@ -15,27 +12,19 @@ export function renderDailyChallenges(container) {
   wrapper.className = 'daily-challenges-mini';
   wrapper.innerHTML = `
     <div class="challenges-mini-header">
-      <span>🎯 Günlük Hedefler</span>
+      ${icon('target', 15)}<span>Günlük hedefler</span>
       <span class="challenges-mini-dots">
-        ${ch.items.map(item => `<span class="challenge-dot ${item.done ? 'done' : ''}" title="${item.title} (${item.done ? '✓' : item.current + '/' + item.target})"></span>`).join('')}
+        ${ch.items.map(item => `<span class="challenge-dot ${item.done ? 'done' : ''}" title="${item.title} (${item.done ? 'tamam' : item.current + '/' + item.target})"></span>`).join('')}
       </span>
       <span class="challenges-mini-count">${completedCount}/${ch.items.length}</span>
     </div>
     ${!allDone ? `<div class="challenges-mini-list">
       ${ch.items.filter(i => !i.done).map(item => `
-        <span class="challenge-mini-tag">${item.icon} ${item.title} <em>+${item.xp}</em></span>
+        <span class="challenge-mini-tag">${item.title}<em>+${item.xp} XP</em></span>
       `).join('')}
-    </div>` : '<div class="challenges-mini-done">🎉 Tüm hedefler tamamlandı!</div>'}
+    </div>` : '<div class="challenges-mini-done">Bugünkü hedeflerin hepsi tamam.</div>'}
   `;
 
-  // Insert at the very top, before task form
+  // Sayfanın en üstüne, görev ekleme satırının üstüne
   container.prepend(wrapper);
-}
-
-export function updateChallengesUI() {
-  const existing = document.querySelector('.daily-challenges-mini');
-  if (!existing) return;
-  const container = existing.parentElement;
-  existing.remove();
-  renderDailyChallenges(container);
 }

@@ -1,0 +1,318 @@
+.pomo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-lg) 0;
+}
+
+.pomo-shortcut-hint {
+  margin-top: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Planlama */
+.pomo-intro {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--space-lg);
+}
+
+.pomo-done-note {
+  align-self: stretch;
+  margin-bottom: var(--space-md);
+}
+
+.pomo-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  width: 100%;
+  margin-bottom: var(--space-md);
+}
+
+.pomo-config-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.pomo-config-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pomo-config-icon {
+  display: inline-flex;
+  color: var(--text-muted);
+}
+
+.pomo-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.pomo-stepper-btn {
+  border: 1px solid var(--border);
+}
+
+.pomo-stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pomo-stepper-btn:disabled:hover {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.pomo-stepper-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.pomo-stepper-number {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  min-width: 2ch;
+  text-align: right;
+}
+
+.pomo-stepper-unit {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pomo-presets {
+  display: flex;
+  width: 100%;
+}
+
+.pomo-presets button {
+  flex: 1;
+  justify-content: center;
+  padding: 4px 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pomo-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+  width: 100%;
+  margin-bottom: var(--space-lg);
+}
+
+.pomo-start-session {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 0.95rem;
+}
+
+.pomo-total-stats {
+  display: flex;
+  gap: var(--space-2xl);
+  justify-content: center;
+  width: 100%;
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.pomo-total-stats .stat {
+  align-items: center;
+}
+
+/* Sayaç */
+.pomo-phase {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.pomo-phase-pill {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 3px 10px;
+}
+
+.pomo-round-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.pomo-round-tracker {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0 0 var(--space-lg);
+  padding: 0;
+  list-style: none;
+}
+
+.pomo-round-tracker .round-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-hover);
+  background: transparent;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pomo-round-tracker .round-dot.active {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.pomo-round-tracker .round-dot.completed {
+  border-color: var(--text-muted);
+  background: var(--text-muted);
+}
+
+.pomo-timer-ring {
+  position: relative;
+  width: 280px;
+  max-width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: var(--space-lg);
+}
+
+.pomo-timer-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.pomo-timer-ring .ring-bg {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+
+.pomo-timer-ring .ring-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.pomo-timer[data-phase="break"] .ring-progress {
+  stroke: var(--success);
+}
+
+.pomo-time-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.pomo-time-text {
+  font-size: 3.5rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.pomo-time-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.pomo-session-info {
+  margin-bottom: var(--space-lg);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.pomo-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.pomo-toggle {
+  min-width: 132px;
+}
+
+.pomo-session-meta {
+  margin-top: var(--space-lg);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Dar ekran */
+@media (max-width: 768px) {
+  .pomo-container {
+    padding: var(--space-md) 0;
+  }
+
+  .pomo-config-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .pomo-summary {
+    gap: var(--space-sm);
+  }
+
+  .pomo-summary .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .pomo-total-stats {
+    gap: var(--space-xl);
+  }
+
+  .pomo-timer-ring {
+    width: 240px;
+  }
+
+  .pomo-time-text {
+    font-size: 2.75rem;
+  }
+
+  .pomo-controls {
+    width: 100%;
+  }
+
+  .pomo-controls .btn {
+    flex: 1 1 auto;
+  }
+}

@@ -1,9 +1,3 @@
-/* ============================================
-   FocusFlow Pro — State Management (Store) v4
-   Removed localStorage — server JSON file is
-   the single source of truth.
-   ============================================ */
-
 import { generateId, calculateStreak, getXPForPriority, getLevelInfo, checkAchievements, generateDailyChallenges, shouldCreateRecurrence, toLocalDateStr } from './utils/helpers.js';
 
 const DEFAULT_CATEGORIES = [
@@ -29,6 +23,7 @@ function getDefaultState() {
         weeklyStats: { weekStart: '', tasksCompleted: 0, xpEarned: 0, pomodoroCount: 0, challengesCompleted: 0 },
         lastWeeklyReportDate: '',
         theme: 'dark',
+        accent: 'tomato',
         pomodoroSessions: 0,
         deletedStack: [],
         weeklySchedule: [],
@@ -41,12 +36,13 @@ class Store {
         this._state = getDefaultState();
         this._saveTimer = null;
         this._pendingSave = false;
+        this._retryTimer = null;
         this._serverReady = false;
         this._listeners = new Map();
         this._initFromServer();
     }
 
-    /* ---- Pub / Sub ---- */
+    /* Olaylar */
     on(event, callback) {
         if (!this._listeners.has(event)) this._listeners.set(event, []);
         this._listeners.get(event).push(callback);
@@ -56,7 +52,7 @@ class Store {
         (this._listeners.get(event) || []).forEach(cb => cb(data));
     }
 
-    /* ---- Persistence (Server-only, no localStorage) ---- */
+    /* Kaydetme ve yükleme */
 
     async _initFromServer() {
         const maxRetries = 5;
@@ -66,37 +62,51 @@ class Store {
                 if (res.ok) {
                     const data = await res.json();
                     this._state = { ...getDefaultState(), ...data };
-                    // Ensure categories exist (migration)
                     if (!this._state.categories || this._state.categories.length === 0) {
                         this._state.categories = DEFAULT_CATEGORIES;
                     }
+                    this._normalizeTheme();
                     this._serverReady = true;
+                    this._emit('connection', 'online');
                     this._updateStreak();
                     this._initDailyChallenges();
                     this._processRecurringTasks();
-                    // Refresh entire UI
-                    this._emit('tasks-changed', { list: 'daily' });
-                    this._emit('tasks-changed', { list: 'weekly' });
-                    this._emit('habits-changed');
-                    this._emit('stats-changed');
-                    this._emit('streak-changed');
-                    this._emit('categories-changed');
-                    this._emit('challenges-changed');
-                    this._emit('theme-changed', this._state.theme);
-                    console.log('✅ Data loaded from server');
-                    return;
+                    this._emitAll();
+                    return true;
                 }
             } catch (e) {
-                console.warn(`⚠️ Server connection attempt ${attempt}/${maxRetries}:`, e.message);
+                console.warn(`Sunucuya bağlanılamadı (${attempt}/${maxRetries}):`, e.message);
             }
-            // Wait before retry (increasing delay)
             await new Promise(r => setTimeout(r, attempt * 500));
         }
-        console.error('❌ Failed to connect to server — using default data.');
+        console.error('Sunucuya ulaşılamadı; bağlantı kurulana kadar hiçbir şey kaydedilmez.');
         this._serverReady = false;
+        this._emit('connection', 'offline');
+        return false;
+    }
+
+    /* Veri sunucudan yüklenemediyse yeniden dener (arayüzdeki "Yeniden dene" düğmesi). */
+    retryConnection() {
+        return this._initFromServer();
+    }
+
+    get isServerReady() { return this._serverReady; }
+
+    /* Tüm arayüzü yeniler (yükleme, içe aktarma, geri alma sonrası). */
+    _emitAll() {
+        this._emit('tasks-changed', { list: 'daily' });
+        this._emit('tasks-changed', { list: 'weekly' });
+        this._emit('habits-changed');
+        this._emit('stats-changed');
+        this._emit('streak-changed');
+        this._emit('categories-changed');
+        this._emit('challenges-changed');
+        this._emit('schedule-changed');
+        this._emit('theme-changed', this._state.theme);
     }
 
     async _saveToServer() {
+        clearTimeout(this._retryTimer);
         try {
             const res = await fetch('/api/data', {
                 method: 'POST',
@@ -104,21 +114,41 @@ class Store {
                 body: JSON.stringify(this._state),
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            if (this._pendingSave) this._emit('connection', 'online');
             this._pendingSave = false;
         } catch (e) {
-            console.warn('⚠️ Failed to save to server, retrying in 3s:', e.message);
+            console.warn('Kaydedilemedi, 3 saniye sonra yeniden denenecek:', e.message);
+            if (!this._pendingSave) this._emit('connection', 'unsaved');
             this._pendingSave = true;
-            setTimeout(() => this._saveToServer(), 3000);
+            this._retryTimer = setTimeout(() => this._saveToServer(), 3000);
         }
     }
 
     _save() {
-        // Debounced server save (max once per 300ms)
+        // Sunucudaki veri yüklenmeden kaydetme: boş durum gerçek verinin üzerine yazılmasın
+        if (!this._serverReady) return;
         clearTimeout(this._saveTimer);
         this._saveTimer = setTimeout(() => this._saveToServer(), 300);
     }
 
-    /* ---- Streak ---- */
+    /* Anlık görüntü: toplu işlemleri geri almak için */
+    snapshot() {
+        return JSON.stringify(this._state);
+    }
+
+    restoreSnapshot(json) {
+        try {
+            this._state = { ...getDefaultState(), ...JSON.parse(json) };
+        } catch (e) {
+            return false;
+        }
+        this._normalizeTheme();
+        this._save();
+        this._emitAll();
+        return true;
+    }
+
+    /* Seri */
     _updateStreak() {
         const prevStreak = this._state.streak;
         const result = calculateStreak(this._state);
@@ -126,16 +156,16 @@ class Store {
         this._state.lastStreakDate = result.lastDate;
         this._state.badgeDates = result.badgeDates;
 
-        // Daily-all-done bonus: give +25 XP when all daily tasks completed (only once per streak update)
+        // Günlük görevlerin hepsi bitince bir kez +25 XP
         const dailyTasks = this._state.tasks.filter(t => t.list === 'daily');
         const allDone = dailyTasks.length > 0 && dailyTasks.every(t => t.completed);
         if (allDone && result.streak > prevStreak) {
-            this._addXP(25, '🎯 Günlük görevler tamamlandı!');
+            this._addXP(25, 'Günlük görevler tamamlandı');
         }
         this._save();
     }
 
-    /* ---- XP System ---- */
+    /* XP */
     _addXP(amount, reason) {
         const prevLevel = getLevelInfo(this._state.xp).level;
         this._state.xp = Math.max(0, this._state.xp + amount);
@@ -154,20 +184,20 @@ class Store {
         }
     }
 
-    /* ---- Achievements ---- */
+    /* Başarımlar */
     _checkAchievements() {
         const { earned, newlyEarned } = checkAchievements(this._state);
         this._state.achievements = earned;
         if (newlyEarned.length > 0) {
             for (const a of newlyEarned) {
-                this._addXP(a.xp, `🏅 Başarım: ${a.name}`);
+                this._addXP(a.xp, `Başarım: ${a.name}`);
             }
             this._save();
             this._emit('achievement-unlocked', newlyEarned);
         }
     }
 
-    /* ---- Daily Challenges ---- */
+    /* Günlük hedefler */
     _initDailyChallenges() {
         const result = generateDailyChallenges(this._state.dailyChallenges?.date);
         if (result) {
@@ -187,19 +217,18 @@ class Store {
                 item.current = Math.min(item.target, item.current + amount);
                 if (item.current >= item.target && !item.done) {
                     item.done = true;
-                    this._addXP(item.xp, `🎯 Challenge: ${item.title}`);
+                    this._addXP(item.xp, `Günlük hedef: ${item.title}`);
                     this._state.weeklyStats.challengesCompleted = (this._state.weeklyStats.challengesCompleted || 0) + 1;
                     changed = true;
                 }
             }
-            // Special: all_daily check
             if (item.type === 'all_daily' && !item.done) {
                 const dailyTasks = this._state.tasks.filter(t => t.list === 'daily');
                 const allDone = dailyTasks.length > 0 && dailyTasks.every(t => t.completed);
                 if (allDone) {
                     item.current = 1;
                     item.done = true;
-                    this._addXP(item.xp, `🎯 Challenge: ${item.title}`);
+                    this._addXP(item.xp, `Günlük hedef: ${item.title}`);
                     changed = true;
                 }
             }
@@ -210,14 +239,13 @@ class Store {
         }
     }
 
-    /* ---- Recurring Tasks ---- */
+    /* Tekrarlayan görevler */
     _processRecurringTasks() {
         const today = toLocalDateStr(new Date());
         const recurringTasks = this._state.tasks.filter(t => t.recurrence && t.recurrence !== 'none');
         let added = 0;
         recurringTasks.forEach(task => {
             if (shouldCreateRecurrence(task, today)) {
-                // Check if already created for today
                 const exists = this._state.tasks.some(t =>
                     t.recurringSourceId === task.id && t.createdAt?.startsWith(today)
                 );
@@ -246,7 +274,7 @@ class Store {
         }
     }
 
-    /* ---- Weekly Stats ---- */
+    /* Haftalık istatistik */
     _trackWeeklyStat(key, amount = 1) {
         if (!this._state.weeklyStats) {
             this._state.weeklyStats = { weekStart: '', tasksCompleted: 0, xpEarned: 0, pomodoroCount: 0, challengesCompleted: 0 };
@@ -257,7 +285,7 @@ class Store {
         monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
         const weekStart = toLocalDateStr(monday);
         if (this._state.weeklyStats.weekStart !== weekStart) {
-            // New week — archive old and reset
+            // Yeni hafta: eskisini sakla, sayaçları sıfırla
             this._state.lastWeeklyStats = { ...this._state.weeklyStats };
             this._state.weeklyStats = { weekStart, tasksCompleted: 0, xpEarned: 0, pomodoroCount: 0, challengesCompleted: 0 };
         }
@@ -269,7 +297,7 @@ class Store {
         this._save();
     }
 
-    /* ---- Getters ---- */
+    /* Okuma */
     get state() { return this._state; }
     get tasks() { return this._state.tasks; }
     get habits() { return this._state.habits; }
@@ -289,7 +317,7 @@ class Store {
     get categoryMappings() { return this._state.categoryMappings; }
     getTasksByList(list) { return this._state.tasks.filter(t => t.list === list); }
 
-    /* ---- Categories CRUD ---- */
+    /* Kategoriler */
     addCategory(label, icon, color) {
         const id = label.trim();
         if (this._state.categories.some(c => c.id === id)) return false;
@@ -302,7 +330,7 @@ class Store {
     deleteCategory(id) {
         if (this._state.categories.length <= 1) return false;
         this._state.categories = this._state.categories.filter(c => c.id !== id);
-        // Reassign tasks using this category to the first remaining
+        // Silinen kategorinin görevleri ilk kategoriye geçer
         const fallback = this._state.categories[0].id;
         this._state.tasks.forEach(t => { if (t.category === id) t.category = fallback; });
         this._save();
@@ -320,7 +348,7 @@ class Store {
         this._emit('categories-changed');
     }
 
-    /* ---- Task CRUD ---- */
+    /* Görevler */
     addTask({ title, category = 'Genel', priority = 'medium', dueDate = '', list = 'daily', notes = '', recurrence = 'none' }) {
         const task = {
             id: generateId(),
@@ -347,12 +375,12 @@ class Store {
         const task = this._state.tasks.find(t => t.id === id);
         if (!task) return null;
         Object.assign(task, updates);
-        // Sync linked (daily copy ↔ weekly source)
+        // Haftalık görev ile bugüne eklenen kopyası birlikte güncellenir
         if (task.sourceId) {
             const src = this._state.tasks.find(t => t.id === task.sourceId);
             if (src) {
                 if ('completed' in updates) src.completed = updates.completed;
-                if ('title' in updates) src.title = updates.title.replace(/^🔗\s*/, '');
+                if ('title' in updates) src.title = updates.title.replace(/^\u{1F517}\s*/u, '');
             }
         }
         this._state.tasks.filter(t => t.sourceId === id).forEach(copy => {
@@ -369,24 +397,22 @@ class Store {
         const task = this._state.tasks.find(t => t.id === id);
         if (!task) return;
         task.completed = !task.completed;
-        // Sync linked
         if (task.sourceId) {
             const src = this._state.tasks.find(t => t.id === task.sourceId);
             if (src) src.completed = task.completed;
         }
         this._state.tasks.filter(t => t.sourceId === id).forEach(c => { c.completed = task.completed; });
 
-        // XP for task completion
         const xpAmount = getXPForPriority(task.priority);
         if (task.completed) {
             this._state.totalTasksCompleted = (this._state.totalTasksCompleted || 0) + 1;
-            this._addXP(xpAmount, `✅ Görev: ${task.title.substring(0, 30)}`);
+            this._addXP(xpAmount, `Görev: ${task.title.substring(0, 30)}`);
             this._updateChallengeProgress('tasks');
             this._trackWeeklyStat('tasksCompleted');
             this._trackWeeklyStat('xpEarned', xpAmount);
         } else {
             this._state.totalTasksCompleted = Math.max(0, (this._state.totalTasksCompleted || 0) - 1);
-            this._addXP(-xpAmount, `↩️ Geri alındı: ${task.title.substring(0, 30)}`);
+            this._addXP(-xpAmount, `Geri alındı: ${task.title.substring(0, 30)}`);
         }
 
         this._save();
@@ -403,9 +429,7 @@ class Store {
         if (!task) return;
         this._state.deletedStack.push({ ...task });
         if (this._state.deletedStack.length > 10) this._state.deletedStack.shift();
-        // Also remove linked copies
         this._state.tasks = this._state.tasks.filter(t => t.id !== id && t.sourceId !== id);
-        // If deleting a copy, don't delete the source
         this._save();
         this._emit('tasks-changed', { list: 'daily' });
         this._emit('tasks-changed', { list: 'weekly' });
@@ -424,21 +448,45 @@ class Store {
     }
 
     clearCompleted(list) {
-        // Collect IDs of completed tasks
+        const before = this._state.tasks;
         const completedIds = this._state.tasks
             .filter(t => t.list === list && t.completed)
             .map(t => t.id);
-        // Remove completed + their linked daily copies
         this._state.tasks = this._state.tasks.filter(t => {
             if (t.list === list && t.completed) return false;
-            // If a daily copy's source is in the completed list, remove it too
+            // Haftalık kaynağı silinen kopya da gider
             if (t.sourceId && completedIds.includes(t.sourceId)) return false;
             return true;
         });
+        const removed = before.filter(t => !this._state.tasks.includes(t));
         this._save();
         this._emit('tasks-changed', { list: 'daily' });
         this._emit('tasks-changed', { list: 'weekly' });
         this._emit('stats-changed');
+        return { removed, order: before.map(t => t.id) };
+    }
+
+    /* clearCompleted sonucunu geri yükler (görevler eski sıralarına döner). */
+    restoreCleared(result) {
+        if (!result || !result.removed || result.removed.length === 0) return 0;
+        const existing = new Set(this._state.tasks.map(t => t.id));
+        const back = result.removed.filter(t => !existing.has(t.id));
+        const rank = new Map(result.order.map((id, i) => [id, i]));
+        this._state.tasks = [...this._state.tasks, ...back]
+            .sort((a, b) => (rank.get(a.id) ?? -1) - (rank.get(b.id) ?? -1));
+        this._save();
+        this._emit('tasks-changed', { list: 'daily' });
+        this._emit('tasks-changed', { list: 'weekly' });
+        this._emit('stats-changed');
+        return back.length;
+    }
+
+    /* Görevi istenen duruma getirir (zaten o durumdaysa dokunmaz). */
+    setTaskCompleted(id, completed = true) {
+        const task = this._state.tasks.find(t => t.id === id);
+        if (!task || task.completed === completed) return false;
+        this.toggleTask(id);
+        return true;
     }
 
     moveToDaily(id) {
@@ -450,7 +498,7 @@ class Store {
             id: generateId(),
             list: 'daily',
             sourceId: id,
-            title: `🔗 ${task.title}`,
+            title: task.title,
             completed: task.completed,
             subtasks: task.subtasks ? task.subtasks.map(s => ({ ...s })) : [],
         };
@@ -461,7 +509,7 @@ class Store {
         return true;
     }
 
-    /* ---- Subtasks ---- */
+    /* Alt görevler */
     addSubtask(taskId, title) {
         const task = this._state.tasks.find(t => t.id === taskId);
         if (!task) return;
@@ -488,8 +536,8 @@ class Store {
         this._emit('tasks-changed', { list: task.list });
     }
 
-    /* ---- Habits ---- */
-    addHabit(name, icon = '🎯') {
+    /* Alışkanlıklar */
+    addHabit(name, icon = 'target') {
         const habit = { id: generateId(), name: name.trim(), icon, history: {}, createdAt: new Date().toISOString() };
         this._state.habits.push(habit);
         this._save();
@@ -504,12 +552,11 @@ class Store {
         habit.history[dateStr] = !wasChecked;
         if (!habit.history[dateStr]) delete habit.history[dateStr];
 
-        // XP for habit tracking
         if (!wasChecked) {
-            this._addXP(5, `🧘 Alışkanlık: ${habit.name}`);
+            this._addXP(5, `Alışkanlık: ${habit.name}`);
             this._updateChallengeProgress('habits');
         } else {
-            this._addXP(-5, `↩️ Alışkanlık geri alındı: ${habit.name}`);
+            this._addXP(-5, `Alışkanlık geri alındı: ${habit.name}`);
         }
 
         this._save();
@@ -523,7 +570,7 @@ class Store {
         this._emit('habits-changed');
     }
 
-    /* ---- Reorder ---- */
+    /* Sıralama */
     reorderTask(taskId, newIndex, list) {
         const listTasks = this._state.tasks.filter(t => t.list === list);
         const otherTasks = this._state.tasks.filter(t => t.list !== list);
@@ -536,7 +583,7 @@ class Store {
         this._emit('tasks-changed', { list });
     }
 
-    /* ---- Weekly Schedule ---- */
+    /* Ders programı */
     setCategoryMappings(mappings) {
         this._state.categoryMappings = { ...this._state.categoryMappings, ...mappings };
         this._save();
@@ -546,6 +593,26 @@ class Store {
         this._state.weeklySchedule = entries;
         this._save();
         this._emit('schedule-changed');
+    }
+
+    addScheduleEntry({ day, time, activity, category = 'Genel', priority = 'medium' }) {
+        if (!day || !time || !activity || !String(activity).trim()) return null;
+        const entry = {
+            id: generateId(),
+            day,
+            time: String(time).trim(),
+            activity: String(activity).trim(),
+            category: this._state.categories.some(c => c.id === category) ? category : (this._state.categories[0]?.id || 'Genel'),
+            priority: ['low', 'medium', 'high'].includes(priority) ? priority : 'medium',
+        };
+        this.setWeeklySchedule([...this._state.weeklySchedule, entry]);
+        return entry;
+    }
+
+    deleteScheduleEntry(id) {
+        if (!this._state.weeklySchedule.some(e => e.id === id)) return false;
+        this.setWeeklySchedule(this._state.weeklySchedule.filter(e => e.id !== id));
+        return true;
     }
 
     updateScheduleEntry(id, updates) {
@@ -572,7 +639,7 @@ class Store {
         let added = 0;
         const mappings = this._state.categoryMappings;
         dayEntries.forEach(entry => {
-            // Skip duplicates — check if a task with same title+time exists in daily
+            // Aynı saat ve adla görev varsa yeniden ekleme
             const title = `${entry.time} — ${entry.activity}`;
             const exists = this._state.tasks.some(t => t.list === 'daily' && t.title === title);
             if (exists) return;
@@ -584,8 +651,30 @@ class Store {
         return added;
     }
 
-    /* ---- Theme ---- */
-    static THEMES = ['dark', 'light', 'ocean', 'sunset', 'forest', 'rose', 'nord', 'dracula'];
+    /* Tema */
+    static THEMES = ['light', 'dark', 'system'];
+    static ACCENTS = ['tomato', 'forest', 'ocean', 'amber', 'rose', 'graphite'];
+    // Eski sürümdeki tema adları yeni tema + vurgu rengine çevrilir
+    static LEGACY_THEMES = {
+        ocean: ['dark', 'ocean'],
+        sunset: ['dark', 'amber'],
+        forest: ['dark', 'forest'],
+        rose: ['dark', 'rose'],
+        nord: ['dark', 'ocean'],
+        dracula: ['dark', 'tomato'],
+    };
+
+    _normalizeTheme() {
+        const legacy = Store.LEGACY_THEMES[this._state.theme];
+        if (legacy) {
+            this._state.theme = legacy[0];
+            this._state.accent = legacy[1];
+        }
+        if (!Store.THEMES.includes(this._state.theme)) this._state.theme = 'dark';
+        if (!Store.ACCENTS.includes(this._state.accent)) this._state.accent = 'tomato';
+    }
+
+    get accent() { return this._state.accent; }
 
     setTheme(name) {
         if (!Store.THEMES.includes(name)) return;
@@ -594,16 +683,21 @@ class Store {
         this._emit('theme-changed', this._state.theme);
     }
 
-    toggleTheme() {
-        const idx = Store.THEMES.indexOf(this._state.theme);
-        const next = Store.THEMES[(idx + 1) % Store.THEMES.length];
-        this.setTheme(next);
+    setAccent(name) {
+        if (!Store.ACCENTS.includes(name)) return;
+        this._state.accent = name;
+        this._save();
+        this._emit('theme-changed', this._state.theme);
     }
 
-    /* ---- Pomodoro ---- */
+    toggleTheme() {
+        this.setTheme(this._state.theme === 'light' ? 'dark' : 'light');
+    }
+
+    /* Pomodoro */
     incrementPomodoroSessions() {
         this._state.pomodoroSessions++;
-        this._addXP(15, '🍅 Pomodoro oturumu tamamlandı');
+        this._addXP(15, 'Pomodoro oturumu tamamlandı');
         this._updateChallengeProgress('pomodoro');
         this._trackWeeklyStat('pomodoroCount');
         this._trackWeeklyStat('xpEarned', 15);
@@ -612,7 +706,7 @@ class Store {
         this._emit('stats-changed');
     }
 
-    /* ---- Export ---- */
+    /* Dışa aktarma */
     exportData() {
         const blob = new Blob([JSON.stringify(this._state, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -623,7 +717,7 @@ class Store {
         URL.revokeObjectURL(url);
     }
 
-    /* ---- Import ---- */
+    /* İçe aktarma */
     importData() {
         return new Promise((resolve, reject) => {
             const input = document.createElement('input');
@@ -636,23 +730,15 @@ class Store {
                 reader.onload = (ev) => {
                     try {
                         const data = JSON.parse(ev.target.result);
-                        // Validate: must have at least tasks array
                         if (!data || typeof data !== 'object') {
                             reject('Geçersiz JSON dosyası');
                             return;
                         }
-                        // Merge with defaults to ensure all fields exist
                         this._state = { ...getDefaultState(), ...data };
+                        this._normalizeTheme();
                         this._save();
                         this._updateStreak();
-                        // Emit all events to refresh UI
-                        this._emit('tasks-changed', { list: 'daily' });
-                        this._emit('tasks-changed', { list: 'weekly' });
-                        this._emit('habits-changed');
-                        this._emit('stats-changed');
-                        this._emit('streak-changed');
-                        this._emit('categories-changed');
-                        this._emit('theme-changed', this._state.theme);
+                        this._emitAll();
                         resolve(data);
                     } catch (err) {
                         reject('JSON dosyası okunamadı: ' + err.message);

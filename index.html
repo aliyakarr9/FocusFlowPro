@@ -7,37 +7,51 @@
   <meta name="description"
     content="FocusFlow Pro — Modern görev yönetimi ve odaklanma aracı. Günlük & haftalık planlama, Pomodoro zamanlayıcı, analiz paneli." />
   <title>FocusFlow Pro — Akıllı Görev Yöneticisi</title>
+  <script>
+    // Son kullanılan görünümü ilk boyamadan önce uygula
+    try {
+      var a = JSON.parse(localStorage.getItem('focusflow-appearance') || 'null');
+      if (a) {
+        var dark = a.theme === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : a.theme !== 'light';
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-accent', a.accent || 'tomato');
+      }
+    } catch (e) { }
+  </script>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/ai-chat.css" />
+  <link rel="stylesheet" href="css/pomodoro.css" />
+  <link rel="stylesheet" href="css/habits.css" />
+  <link rel="stylesheet" href="css/analytics.css" />
+  <link rel="stylesheet" href="css/schedule.css" />
   <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='38' fill='%23cc4125'/></svg>" />
 </head>
 
 <body>
   <div class="app-container">
 
-    <!-- ====== SIDEBAR ====== -->
     <aside class="sidebar" id="sidebar">
-      <!-- Rendered by Sidebar.js -->
     </aside>
 
-    <!-- ====== MAIN CONTENT ====== -->
     <main class="main-content">
 
-      <!-- Header -->
       <header class="page-header">
-        <div style="display:flex;align-items:center;gap:var(--space-md);">
-          <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
-          <h2 id="page-title">📋 Bugünün Görevleri</h2>
+        <div class="page-heading">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Menüyü aç"></button>
+          <div>
+            <h2 id="page-title">Bugün</h2>
+            <div class="page-subtitle" id="page-subtitle"></div>
+          </div>
         </div>
         <div class="header-actions">
-          <div class="theme-picker-wrapper" id="theme-picker-wrapper">
-            <button class="theme-toggle" id="theme-toggle" title="Tema değiştir">🎨</button>
+          <button class="theme-toggle" id="shortcuts-btn" title="Klavye kısayolları (?)" aria-label="Klavye kısayolları"></button>
+          <div class="appearance-wrapper" id="appearance-wrapper">
+            <button class="theme-toggle" id="theme-toggle" title="Görünüm" aria-label="Görünüm" aria-haspopup="true" aria-expanded="false"></button>
           </div>
         </div>
       </header>
 
-      <!-- Page Views -->
       <div class="page-content">
         <div class="page-view active" id="page-daily"></div>
         <div class="page-view" id="page-weekly"></div>
@@ -48,9 +62,8 @@
         <div class="page-view" id="page-schedule"></div>
       </div>
 
-      <!-- Motivation Bar -->
       <footer class="motivation-bar">
-        <span id="motivation-text">Sadece başla, gerisi gelecek. 🚀</span>
+        <span id="motivation-text">Sadece başla, gerisi gelecek.</span>
       </footer>
 
     </main>

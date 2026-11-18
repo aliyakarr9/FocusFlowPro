@@ -1,7 +1,7 @@
 """
-FocusFlow Pro — Desktop Application Launcher
-Starts the Flask server in a background thread and opens
-a native macOS window via pywebview.
+FocusFlow Pro masaüstü başlatıcısı.
+
+Sunucuyu arka planda çalıştırır ve arayüzü pywebview penceresinde açar.
 """
 
 import sys
@@ -9,9 +9,10 @@ import os
 import threading
 import time
 
-# When frozen by PyInstaller, static files live inside _MEIPASS
+# Paketli sürümde arayüz dosyaları _MEIPASS altındadır
 if getattr(sys, 'frozen', False):
     os.chdir(sys._MEIPASS)
+
 
 from server import app, auto_backup
 
@@ -22,16 +23,17 @@ def find_free_port():
         s.bind(('', 0))
         return s.getsockname()[1]
 
+
 DYNAMIC_PORT = find_free_port()
 
+
 def start_server():
-    """Run the Flask server silently in a daemon thread."""
     auto_backup()
     app.run(port=DYNAMIC_PORT, use_reloader=False)
 
 
 def wait_for_server(url=f"http://localhost:{DYNAMIC_PORT}", timeout=10):
-    """Block until the Flask server is reachable."""
+    """Sunucu yanıt verene kadar bekler."""
     import urllib.request
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -44,16 +46,16 @@ def wait_for_server(url=f"http://localhost:{DYNAMIC_PORT}", timeout=10):
 
 
 if __name__ == '__main__':
-    # Start Flask in a daemon thread so it dies when the window closes
+    # Sunucu arka planda çalışır; pencere kapanınca o da kapanır
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()
 
-    # Wait until the server is ready before opening the window
+    # Pencereyi sunucu hazır olunca aç
     wait_for_server()
 
     import webview
     webview.create_window(
-        'FocusFlow Pro ⚡',
+        'FocusFlow Pro',
         f'http://localhost:{DYNAMIC_PORT}',
         width=1200,
         height=800,

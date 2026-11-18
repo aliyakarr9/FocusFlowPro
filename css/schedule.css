@@ -1,0 +1,433 @@
+.schedule-page {
+  --schedule-time-col: 76px;
+  --schedule-day-col: 116px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+/* İçe aktarma */
+.schedule-import {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.schedule-import-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.schedule-csv {
+  min-height: 180px;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.schedule-format {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding-left: var(--space-md);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.schedule-code {
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+
+.schedule-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.schedule-import-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-left: auto;
+}
+
+/* Araç çubuğu */
+.schedule-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.schedule-summary {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.schedule-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-left: auto;
+}
+
+/* Tablo */
+.schedule-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  -webkit-overflow-scrolling: touch;
+}
+
+.schedule-grid {
+  display: grid;
+  gap: 1px;
+  grid-auto-rows: minmax(56px, auto);
+  background: var(--border);
+}
+
+.schedule-corner,
+.schedule-day,
+.schedule-time,
+.schedule-entry,
+.schedule-slot {
+  background: var(--bg-card);
+  min-width: 0;
+}
+
+.schedule-corner,
+.schedule-time {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  border-right: 1px solid var(--border);
+}
+
+.schedule-corner {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-sm) 0 var(--space-md);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+}
+
+.schedule-day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-xs) var(--space-sm) var(--space-sm);
+  background: var(--bg-secondary);
+}
+
+.schedule-day-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.schedule-day-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-day-note {
+  font-size: 0.72rem;
+  color: var(--accent);
+}
+
+.schedule-day.is-today {
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-secondary));
+}
+
+.schedule-day.is-today .schedule-day-name {
+  color: var(--accent);
+}
+
+.schedule-transfer {
+  width: 28px;
+  height: 28px;
+  color: var(--text-muted);
+}
+
+.schedule-day.is-today .schedule-transfer {
+  color: var(--accent);
+}
+
+.schedule-transfer:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.schedule-transfer:disabled:hover {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.schedule-time {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.schedule-time-end {
+  color: var(--text-muted);
+}
+
+/* Ders hücresi */
+.schedule-entry {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) 16px;
+  border: none;
+  border-radius: 0;
+  color: var(--text-primary);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.schedule-entry:hover {
+  background: var(--bg-card-hover);
+}
+
+.schedule-entry:focus-visible,
+.schedule-slot:focus-visible {
+  outline-offset: -2px;
+}
+
+.schedule-marker {
+  position: absolute;
+  left: 6px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: var(--radius-full);
+  background: var(--border-hover);
+}
+
+.schedule-entry-name {
+  max-width: 100%;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.schedule-entry-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Boş hücre: üzerine gelince ekleme işareti */
+.schedule-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.schedule-slot svg {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.schedule-slot:hover {
+  background: var(--bg-card-hover);
+}
+
+.schedule-slot:hover svg,
+.schedule-slot:focus-visible svg {
+  opacity: 1;
+}
+
+.schedule-entry.is-today,
+.schedule-slot.is-today {
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-card));
+}
+
+.schedule-entry.is-today:hover,
+.schedule-slot.is-today:hover {
+  background: color-mix(in srgb, var(--accent) 9%, var(--bg-card));
+}
+
+.schedule-note {
+  margin: 0;
+}
+
+/* Pencereler */
+.schedule-modal-text {
+  margin: 0 0 var(--space-md);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.schedule-modal-actions {
+  align-items: center;
+  margin-top: var(--space-lg);
+}
+
+.schedule-actions-spacer {
+  flex: 1;
+}
+
+/* Kategori eşleştirme */
+.schedule-map-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  max-height: 44vh;
+  overflow-y: auto;
+}
+
+.schedule-map-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px var(--space-sm) 6px var(--space-md);
+}
+
+.schedule-map-row + .schedule-map-row {
+  border-top: 1px solid var(--border);
+}
+
+.schedule-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--border-hover);
+}
+
+.schedule-map-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.schedule-map-select {
+  width: auto;
+  min-width: 130px;
+  max-width: 45%;
+  flex-shrink: 0;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+}
+
+.schedule-map-done {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-md);
+  font-size: 0.88rem;
+  color: var(--success);
+}
+
+.schedule-map-existing {
+  margin-top: var(--space-md);
+}
+
+.schedule-map-existing summary {
+  padding: var(--space-xs) 0;
+  margin-bottom: var(--space-sm);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.schedule-map-existing summary:hover {
+  color: var(--text-primary);
+}
+
+/* Ders ekle / düzenle */
+.schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.schedule-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.schedule-readonly {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.schedule-priority {
+  align-self: flex-start;
+}
+
+/* Dar ekran */
+@media (max-width: 768px) {
+  .schedule-page {
+    --schedule-time-col: 64px;
+    --schedule-day-col: 108px;
+  }
+
+  .schedule-corner,
+  .schedule-time {
+    padding-left: var(--space-sm);
+  }
+
+  .schedule-toolbar-actions {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .schedule-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-map-row {
+    flex-wrap: wrap;
+  }
+
+  .schedule-map-select {
+    max-width: none;
+    width: 100%;
+  }
+}

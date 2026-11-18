@@ -1,10 +1,14 @@
-/* ============================================
-   FocusFlow Pro — Sidebar Component (v3)
-   Added: XP progress bar & level display
-   ============================================ */
-
 import store from '../store.js';
-import { getCurrentBadge, getLevelInfo, isOverdue } from '../utils/helpers.js';
+import { getLevelInfo, isOverdue } from '../utils/helpers.js';
+import { icon } from '../utils/icons.js';
+
+const countText = (n) => (n > 0 ? String(n) : '');
+const overdueAlert = (n) => (n > 0
+  ? `<div class="nav-overdue-alert" role="button" tabindex="0" title="Bugün sayfasına git">${icon('alert', 16)}<span>${n} gecikmiş görev</span></div>`
+  : '');
+const countOverdue = () => store.tasks.filter(t => !t.completed && isOverdue(t.dueDate)).length;
+const goToDaily = () => window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'daily' } }));
+const xpTitle = (info) => (info.next ? `Sonraki seviyeye ${info.xpNeeded - info.xpInLevel} XP` : 'En yüksek seviye');
 
 export function renderSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -15,77 +19,72 @@ export function renderSidebar() {
   sidebar.innerHTML = `
     <div class="sidebar-header">
       <div class="sidebar-logo">
-        <span class="logo-text"><span class="logo-focus">Focus</span><span class="logo-flow">Flow</span></span>
+        <span class="logo-text">FocusFlow</span>
       </div>
     </div>
 
     <nav class="sidebar-nav">
       <div class="nav-section-title">Görevler</div>
       <div class="nav-item active" data-page="daily">
-        <span class="nav-icon">📋</span>
+        <span class="nav-icon">${icon('sun')}</span>
         <span>Bugün</span>
-        <span class="nav-badge" id="daily-count">${store.getTasksByList('daily').filter(t => !t.completed).length}</span>
+        <span class="nav-badge" id="daily-count">${countText(store.getTasksByList('daily').filter(t => !t.completed).length)}</span>
       </div>
       <div class="nav-item" data-page="weekly">
-        <span class="nav-icon">📅</span>
+        <span class="nav-icon">${icon('calendar')}</span>
         <span>Haftalık</span>
-        <span class="nav-badge" id="weekly-count">${store.getTasksByList('weekly').filter(t => !t.completed).length}</span>
+        <span class="nav-badge" id="weekly-count">${countText(store.getTasksByList('weekly').filter(t => !t.completed).length)}</span>
       </div>
-      ${overdueTasks.length > 0 ? `
-        <div class="nav-overdue-alert">
-          ⚠️ ${overdueTasks.length} gecikmiş görev
-        </div>
-      ` : ''}
+      <div id="overdue-slot">${overdueAlert(overdueTasks.length)}</div>
 
       <div class="nav-section-title">Araçlar</div>
       <div class="nav-item" data-page="pomodoro">
-        <span class="nav-icon">🍅</span>
+        <span class="nav-icon">${icon('clock')}</span>
         <span>Pomodoro</span>
       </div>
       <div class="nav-item" data-page="habits">
-        <span class="nav-icon">🧘</span>
+        <span class="nav-icon">${icon('repeat')}</span>
         <span>Alışkanlıklar</span>
       </div>
       <div class="nav-item" data-page="analytics">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon">${icon('chart')}</span>
         <span>Analiz</span>
       </div>
       <div class="nav-item" data-page="badges">
-        <span class="nav-icon">🏅</span>
+        <span class="nav-icon">${icon('award')}</span>
         <span>Koleksiyon</span>
       </div>
       <div class="nav-item" data-page="schedule">
-        <span class="nav-icon">🗓️</span>
+        <span class="nav-icon">${icon('table')}</span>
         <span>Ders Programı</span>
       </div>
     </nav>
 
     <div class="sidebar-shortcuts">
-      <div class="shortcut-hint">⌘N Yeni görev · ⌘Z Geri al</div>
-      <div class="shortcut-hint">1-6 Sayfa geçişi</div>
+      <div class="shortcut-hint">N yeni görev · / ara · ? kısayollar</div>
     </div>
 
     <div class="sidebar-xp-panel">
       <div class="xp-level-header">
-        <span class="xp-level-icon">${levelInfo.icon}</span>
-        <div class="xp-level-info">
-          <span class="xp-level-title">Svy. ${levelInfo.level} — ${levelInfo.title}</span>
-          <span class="xp-total">${store.xp} XP</span>
-        </div>
+        <span class="xp-level-title">Seviye ${levelInfo.level} · ${levelInfo.title}</span>
+        <span class="xp-total">${store.xp} XP</span>
       </div>
-      <div class="xp-bar-wrapper">
+      <div class="xp-bar-wrapper" title="${xpTitle(levelInfo)}">
         <div class="xp-bar-fill" style="width:${levelInfo.progress}%"></div>
       </div>
-      <div class="xp-bar-labels">
-        <span>${levelInfo.xpInLevel}</span>
-        <span>${levelInfo.next ? levelInfo.xpNeeded : 'MAX'}</span>
-      </div>
       <div class="sidebar-streak-mini">
-        <span class="streak-fire">🔥</span>
-        <span>${streak} Günlük Seri</span>
+        <span class="streak-fire">${icon('flame', 15)}</span>
+        <span>${streak} günlük seri</span>
       </div>
     </div>
   `;
+
+  // Gecikmiş görev uyarısı (içeriği updateSidebarCounts ile güncellenir)
+  const overdueSlot = sidebar.querySelector('#overdue-slot');
+  overdueSlot.addEventListener('click', (e) => { if (e.target.closest('.nav-overdue-alert')) goToDaily(); });
+  overdueSlot.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.closest('.nav-overdue-alert')) { e.preventDefault(); goToDaily(); }
+  });
 
   sidebar.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -100,8 +99,10 @@ export function renderSidebar() {
 export function updateSidebarCounts() {
   const dailyEl = document.getElementById('daily-count');
   const weeklyEl = document.getElementById('weekly-count');
-  if (dailyEl) dailyEl.textContent = store.getTasksByList('daily').filter(t => !t.completed).length;
-  if (weeklyEl) weeklyEl.textContent = store.getTasksByList('weekly').filter(t => !t.completed).length;
+  if (dailyEl) dailyEl.textContent = countText(store.getTasksByList('daily').filter(t => !t.completed).length);
+  if (weeklyEl) weeklyEl.textContent = countText(store.getTasksByList('weekly').filter(t => !t.completed).length);
+  const overdueSlot = document.getElementById('overdue-slot');
+  if (overdueSlot) overdueSlot.innerHTML = overdueAlert(countOverdue());
 }
 
 export function updateSidebarXP() {
@@ -111,19 +112,12 @@ export function updateSidebarXP() {
   const titleEl = document.querySelector('.xp-level-title');
   const totalEl = document.querySelector('.xp-total');
   const fillEl = document.querySelector('.xp-bar-fill');
-  const iconEl = document.querySelector('.xp-level-icon');
-  const labelsEl = document.querySelectorAll('.xp-bar-labels span');
+  const barEl = document.querySelector('.xp-bar-wrapper');
   const streakEl = document.querySelector('.sidebar-streak-mini');
 
-  if (titleEl) titleEl.textContent = `Svy. ${levelInfo.level} — ${levelInfo.title}`;
+  if (titleEl) titleEl.textContent = `Seviye ${levelInfo.level} · ${levelInfo.title}`;
   if (totalEl) totalEl.textContent = `${store.xp} XP`;
   if (fillEl) fillEl.style.width = `${levelInfo.progress}%`;
-  if (iconEl) iconEl.textContent = levelInfo.icon;
-  if (labelsEl[0]) labelsEl[0].textContent = levelInfo.xpInLevel;
-  if (labelsEl[1]) labelsEl[1].textContent = levelInfo.next ? levelInfo.xpNeeded : 'MAX';
-  if (streakEl) streakEl.innerHTML = `<span class="streak-fire">🔥</span><span>${streak} Günlük Seri</span>`;
+  if (barEl) barEl.title = xpTitle(levelInfo);
+  if (streakEl) streakEl.innerHTML = `<span class="streak-fire">${icon('flame', 15)}</span><span>${streak} günlük seri</span>`;
 }
-
-// Keep backward compat alias
-export const updateSidebarStreak = updateSidebarXP;
-

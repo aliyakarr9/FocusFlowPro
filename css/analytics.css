@@ -1,0 +1,533 @@
+/* Ortak sayfa düzeni */
+.an-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.an-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.an-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* İlerleme çubuğu */
+.an-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.an-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
+.an-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.an-row-value {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Analiz: sayı kutuları */
+.an-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.an-stat {
+  padding: var(--space-md) var(--space-lg);
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.an-stat-icon {
+  display: inline-flex;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.an-stat.is-warning .an-stat-icon,
+.an-stat.is-warning .stat-value {
+  color: var(--warning);
+}
+
+.an-empty {
+  padding: 0;
+}
+
+/* Analiz: ilerleme ve kategoriler */
+.an-overall,
+.an-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.an-overall .an-row-head:not(:first-child) {
+  margin-top: var(--space-sm);
+}
+
+.an-cat-list {
+  gap: var(--space-md);
+}
+
+.an-cat-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.an-cat-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.an-cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* Analiz: bu hafta */
+.an-week {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.an-week-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.an-week-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+/* Analiz: dışa ve içe aktarma */
+.an-data {
+  padding: 0;
+}
+
+.an-data-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.an-data-row + .an-data-row {
+  border-top: 1px solid var(--border);
+}
+
+.an-data-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.an-data-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Koleksiyon: seviye kartı */
+.an-level {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.an-level-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.an-level-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.an-level-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.an-level-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.an-level-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Koleksiyon: XP kayıtları */
+.an-log {
+  padding: var(--space-xs) 0;
+}
+
+.an-log-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.85rem;
+}
+
+.an-log-row + .an-log-row {
+  border-top: 1px solid var(--border);
+}
+
+.an-log-amount {
+  min-width: 44px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.an-log-row.is-gain .an-log-amount {
+  color: var(--success);
+}
+
+.an-log-row.is-loss .an-log-amount {
+  color: var(--text-muted);
+}
+
+.an-log-reason {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.an-log-time {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Koleksiyon: rozetler ve başarımlar */
+.an-badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-sm);
+}
+
+.an-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  min-width: 0;
+}
+
+.an-badge-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-muted);
+}
+
+.an-badge.is-earned .an-badge-icon {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.an-badge-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.an-badge-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.an-badge-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.an-badge-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.an-badge.is-locked .an-badge-name,
+.an-badge.is-locked .an-badge-desc,
+.an-badge.is-locked .an-badge-meta {
+  color: var(--text-muted);
+}
+
+/* Haftalık rapor penceresi */
+.wr-modal {
+  max-width: 480px;
+}
+
+.wr-period {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.wr-period-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.wr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.wr-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.wr-stat-icon {
+  display: inline-flex;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.wr-streak {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.wr-streak .icon {
+  color: var(--accent);
+}
+
+.wr-streak strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.wr-message {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  padding: var(--space-md);
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
+}
+
+/* XP bildirimleri */
+.xp-toast-stack {
+  position: fixed;
+  bottom: calc(var(--space-lg) + 60px);
+  right: var(--space-lg);
+  z-index: 1100;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  max-width: min(340px, calc(100vw - 2 * var(--space-md)));
+  pointer-events: none;
+}
+
+.xp-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  max-width: 100%;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  pointer-events: none;
+}
+
+.xp-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.xp-toast-amount {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.xp-toast.is-gain .xp-toast-amount {
+  color: var(--success);
+}
+
+.xp-toast.is-loss .xp-toast-amount {
+  color: var(--text-muted);
+}
+
+.xp-toast-reason {
+  min-width: 0;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.xp-toast.xp-toast-level {
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.xp-toast-level-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.xp-toast-level-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.xp-toast-level-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.xp-toast-level-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Dar ekran */
+@media (max-width: 768px) {
+  .an-stat-grid,
+  .an-week-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .an-stat {
+    padding: var(--space-md);
+  }
+
+  .an-badge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .an-week-action,
+  .an-data-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .an-data-row {
+    padding: var(--space-md);
+  }
+
+  .an-log-row {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .xp-toast-stack {
+    right: var(--space-md);
+  }
+}

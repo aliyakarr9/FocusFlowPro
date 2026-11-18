@@ -1,4 +1,4 @@
-# Environment & Secrets
+# Gizli bilgiler
 .env
 
 # Python
@@ -7,23 +7,21 @@ __pycache__/
 .venv/
 venv/
 
-# IDE
+# Editör
 .idea/
 .vscode/
 *.swp
 
-# Build artifacts
+# Paketleme
 build/
 dist/
 *.spec
 FocusFlowPro.iconset/
+focusflow_logo.png
 
 # macOS
 .DS_Store
 
-# Data files (server creates these at ~/FocusFlowData/)
+# Veri dosyaları (sunucu bunları ~/FocusFlowData altında tutar)
 backups/
 focusflow_data.json
-veriler.json
-akilli_veriler.json
-asistan_verileri.json
